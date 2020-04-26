@@ -1,3 +1,19 @@
+resource "aws_apigatewayv2_domain_name" "domain" {
+  domain_name = local.domain_name
+
+  domain_name_configuration {
+    certificate_arn = local.ssl_cert_arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+}
+
+resource "aws_apigatewayv2_api_mapping" "mapping" {
+  api_id = aws_apigatewayv2_api.minecraft.id
+  domain_name = aws_apigatewayv2_domain_name.domain.id
+  stage = aws_apigatewayv2_stage.stage.id
+}
+
 resource "aws_apigatewayv2_api" "minecraft" {
   name = "minecraft"
   protocol_type = "HTTP"
