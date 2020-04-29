@@ -7,6 +7,8 @@ resource "aws_cloudwatch_metric_alarm" "inactivity" {
   statistic           = "Average"
   threshold           = 5
   period              = 300
+  treat_missing_data = "notBreaching"
+  evaluate_low_sample_count_percentiles = "ignore"
 
   dimensions = {
     InstanceId = aws_instance.minecraft.id
