@@ -5,7 +5,7 @@ resource "aws_cloudwatch_metric_alarm" "inactivity" {
   metric_name = "CPUUtilization"
   namespace = "AWS/EC2"
   statistic = "Average"
-  threshold = 5
+  threshold = 2
   period = 300
   treat_missing_data = "notBreaching"
 
