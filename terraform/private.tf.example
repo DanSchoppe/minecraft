@@ -6,12 +6,12 @@ locals {
 terraform {
   backend "s3" {
     bucket = "example-bucket"
-    key    = "terraform.tfstate"
+    key = "terraform.tfstate"
     region = "us-east-1"
   }
 }
 
 resource "aws_key_pair" "minecraft" {
-  key_name   = "minecraft"
+  key_name = "minecraft"
   public_key = "ssh-rsa foobarbazfizzbuzzquixquux"
 }

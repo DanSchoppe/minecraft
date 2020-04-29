@@ -4,16 +4,16 @@ locals {
 }
 
 data "archive_file" "init" {
-  type        = "zip"
+  type = "zip"
   source_file = local.lambda_source
   output_path = local.lambda_build
 }
 
 resource "aws_lambda_function" "start" {
-  filename      = local.lambda_build
+  filename = local.lambda_build
   function_name = "start"
-  role          = aws_iam_role.role.arn
-  handler       = "handlers.start"
+  role = aws_iam_role.role.arn
+  handler = "handlers.start"
   source_code_hash = filebase64sha256(local.lambda_build)
   runtime = "nodejs12.x"
   environment {
@@ -24,10 +24,10 @@ resource "aws_lambda_function" "start" {
 }
 
 resource "aws_lambda_function" "stop" {
-  filename      = local.lambda_build
+  filename = local.lambda_build
   function_name = "stop"
-  role          = aws_iam_role.role.arn
-  handler       = "handlers.stop"
+  role = aws_iam_role.role.arn
+  handler = "handlers.stop"
   source_code_hash = filebase64sha256(local.lambda_build)
   runtime = "nodejs12.x"
   environment {
@@ -56,7 +56,7 @@ EOF
 }
 
 resource "aws_iam_policy" "logging_ec2" {
-  name        = "lambda_logging"
+  name = "lambda_logging"
   description = "IAM policy for logging from a lambda"
 
   policy = <<EOF
@@ -86,6 +86,6 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
-  role       = aws_iam_role.role.name
+  role = aws_iam_role.role.name
   policy_arn = aws_iam_policy.logging_ec2.arn
 }
