@@ -3,7 +3,7 @@ resource "aws_apigatewayv2_domain_name" "domain" {
 
   domain_name_configuration {
     certificate_arn = local.ssl_cert_arn
-    endpoint_type   = "REGIONAL"
+    endpoint_type = "REGIONAL"
     security_policy = "TLS_1_2"
   }
 }
@@ -21,7 +21,7 @@ resource "aws_apigatewayv2_api" "minecraft" {
 
 resource "aws_apigatewayv2_stage" "stage" {
   api_id = aws_apigatewayv2_api.minecraft.id
-  name   = "$default"
+  name = "$default"
   auto_deploy = true
 }
 
@@ -40,10 +40,10 @@ resource "aws_apigatewayv2_integration" "start" {
 }
 
 resource "aws_lambda_permission" "start_permission" {
-  statement_id  = "AllowStartInvoke"
-  action        = "lambda:InvokeFunction"
+  statement_id = "AllowStartInvoke"
+  action = "lambda:InvokeFunction"
   function_name = "start"
-  principal     = "apigateway.amazonaws.com"
+  principal = "apigateway.amazonaws.com"
   source_arn = "${aws_apigatewayv2_api.minecraft.execution_arn}/*/*/start"
 }
 
@@ -62,9 +62,9 @@ resource "aws_apigatewayv2_integration" "stop" {
 }
 
 resource "aws_lambda_permission" "stop_permission" {
-  statement_id  = "AllowStopInvoke"
-  action        = "lambda:InvokeFunction"
+  statement_id = "AllowStopInvoke"
+  action = "lambda:InvokeFunction"
   function_name = "stop"
-  principal     = "apigateway.amazonaws.com"
+  principal = "apigateway.amazonaws.com"
   source_arn = "${aws_apigatewayv2_api.minecraft.execution_arn}/*/*/stop"
 }
