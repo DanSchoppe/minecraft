@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_metric_alarm" "inactivity" {
   alarm_name = "minecraft-inactivity"
   comparison_operator = "LessThanThreshold"
-  evaluation_periods = 2
+  evaluation_periods = 3
   metric_name = "CPUUtilization"
   namespace = "AWS/EC2"
   statistic = "Average"
