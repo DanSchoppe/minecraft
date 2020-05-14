@@ -90,6 +90,7 @@ resource "aws_iam_policy" "logging_ec2" {
     {
       "Effect": "Allow",
       "Action": [
+        "ec2:DescribeInstanceStatus",
         "ec2:StartInstances",
         "ec2:StopInstances"
       ],
