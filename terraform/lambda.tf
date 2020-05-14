@@ -37,6 +37,21 @@ resource "aws_lambda_function" "stop" {
   }
 }
 
+resource "aws_lambda_function" "status" {
+  filename = local.lambda_build
+  function_name = "status"
+  role = aws_iam_role.role.arn
+  handler = "handlers.status"
+  source_code_hash = filebase64sha256(local.lambda_build)
+  runtime = "nodejs12.x"
+  environment {
+    variables = {
+      INSTANCE_ID = aws_instance.minecraft.id
+    }
+  }
+}
+
+
 resource "aws_iam_role" "role" {
   assume_role_policy = <<EOF
 {
