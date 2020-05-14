@@ -3,18 +3,18 @@ locals {
   lambda_build = "../lambda/build.zip"
 }
 
-data "archive_file" "init" {
+data "archive_file" "lambda_build" {
   type = "zip"
   source_file = local.lambda_source
   output_path = local.lambda_build
 }
 
 resource "aws_lambda_function" "start" {
-  filename = local.lambda_build
+  filename = data.archive_file.lambda_build.output_path
   function_name = "start"
   role = aws_iam_role.role.arn
   handler = "handlers.start"
-  source_code_hash = filebase64sha256(local.lambda_build)
+  source_code_hash = data.archive_file.lambda_build.output_base64sha256
   runtime = "nodejs12.x"
   environment {
     variables = {
@@ -24,11 +24,11 @@ resource "aws_lambda_function" "start" {
 }
 
 resource "aws_lambda_function" "stop" {
-  filename = local.lambda_build
+  filename = data.archive_file.lambda_build.output_path
   function_name = "stop"
   role = aws_iam_role.role.arn
   handler = "handlers.stop"
-  source_code_hash = filebase64sha256(local.lambda_build)
+  source_code_hash = data.archive_file.lambda_build.output_base64sha256
   runtime = "nodejs12.x"
   environment {
     variables = {
@@ -38,11 +38,11 @@ resource "aws_lambda_function" "stop" {
 }
 
 resource "aws_lambda_function" "status" {
-  filename = local.lambda_build
+  filename = data.archive_file.lambda_build.output_path
   function_name = "status"
   role = aws_iam_role.role.arn
   handler = "handlers.status"
-  source_code_hash = filebase64sha256(local.lambda_build)
+  source_code_hash = data.archive_file.lambda_build.output_base64sha256
   runtime = "nodejs12.x"
   environment {
     variables = {
@@ -70,8 +70,9 @@ resource "aws_iam_role" "role" {
 EOF
 }
 
-resource "aws_iam_policy" "logging_ec2" {
-  name = "lambda_logging"
+# Grant logging access
+resource "aws_iam_policy" "logging" {
+  name = "LambdaLogging"
   description = "IAM policy for logging from a lambda"
 
   policy = <<EOF
@@ -86,7 +87,50 @@ resource "aws_iam_policy" "logging_ec2" {
       ],
       "Resource": "arn:aws:logs:*:*:*",
       "Effect": "Allow"
-    },
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy_attachment" "logging_attachment" {
+  role = aws_iam_role.role.name
+  policy_arn = aws_iam_policy.logging.arn
+}
+
+# Grant EC2 instance status
+resource "aws_iam_policy" "status_ec2" {
+  name = "LambdaEC2Status"
+  description = "IAM policy for logging from a lambda"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstanceStatus"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy_attachment" "status_ec2_attachment" {
+  role = aws_iam_role.role.name
+  policy_arn = aws_iam_policy.status_ec2.arn
+}
+
+# Grant EC2 instance control
+resource "aws_iam_policy" "control_ec2" {
+  name = "MinecraftControl"
+  description = "IAM policy for logging from a lambda"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
     {
       "Effect": "Allow",
       "Action": [
@@ -100,8 +144,7 @@ resource "aws_iam_policy" "logging_ec2" {
 }
 EOF
 }
-
-resource "aws_iam_role_policy_attachment" "lambda_logs" {
+resource "aws_iam_role_policy_attachment" "control_ec2_attachment" {
   role = aws_iam_role.role.name
-  policy_arn = aws_iam_policy.logging_ec2.arn
+  policy_arn = aws_iam_policy.control_ec2.arn
 }
