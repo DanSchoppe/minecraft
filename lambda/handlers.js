@@ -11,7 +11,7 @@ exports.stop = (event, context) => {
 }
 
 // Get instance status
-exports.stop = (event, context) => {
+exports.status = (event, context) => {
   return _instanceState(event, context, 'describeInstanceStatus')
 }
 

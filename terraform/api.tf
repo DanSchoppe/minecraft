@@ -84,7 +84,7 @@ resource "aws_apigatewayv2_integration" "status" {
 }
 
 resource "aws_lambda_permission" "status_permission" {
-  statement_id = "AllowStopInvoke"
+  statement_id = "AllowStatusInvoke"
   action = "lambda:InvokeFunction"
   function_name = "status"
   principal = "apigateway.amazonaws.com"
