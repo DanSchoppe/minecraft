@@ -11,14 +11,14 @@ const toStatusReport = (data) => data.InstanceStatuses[0].InstanceState.Name
 exports.start = (_event, _context, callback) => {
   const method = 'startInstances'
   const dataTransform = toStateChangeReport('StartingInstances')
-  return _instanceState({ callback, method, dataTransform })
+  _instanceState({ callback, method, dataTransform })
 }
 
 // Stop instance
 exports.stop = (_event, _context, callback) => {
   const method = 'stopInstances'
   const dataTransform = toStateChangeReport('StoppingInstances')
-  return _instanceState({ callback, method, dataTransform })
+  _instanceState({ callback, method, dataTransform })
 }
 
 // Get instance status
@@ -26,21 +26,20 @@ exports.status = (_event, _context, callback) => {
   const method = 'describeInstanceStatus'
   const dataTransform = toStatusReport
   const methodParams = { IncludeAllInstances: true }
-  return _instanceState({ callback, method, methodParams, dataTransform })
+  _instanceState({ callback, method, methodParams, dataTransform })
 }
 
-const _instanceState = ({
+async function _instanceState ({
   callback,
   method,
   methodParams = {},
   dataTransform = (data) => data
-}) => {
-  const instanceId = process.env.INSTANCE_ID
-  if (!instanceId) {
-    const error = 'No instanceId provided'
-    console.error(error)
-    return callback(new Error(error))
-  }
+}) {
+  const {
+    INSTANCE_ID: instanceId,
+    SNS_TOPIC_ARN: snsTopicArn,
+    SNS_MESSAGE: snsMessage
+  } = process.env
 
   aws.config.update({region: 'us-east-1'})
   const params = {
@@ -48,16 +47,31 @@ const _instanceState = ({
     InstanceIds: [ instanceId ]
   }
 
-  new aws.EC2()[method](params, function(error, data) {
-    if (error) {
-      console.error(error)
-      callback(new Error(error))
-      return
+  try {
+    const ec2Result = await new aws.EC2()[method](params).promise()
+
+    // Send SNS message if provided
+    try {
+      if (snsTopicArn && snsMessage) {
+        const snsResult = await new aws.SNS()
+          .publish({
+            TopicArn: snsTopicArn,
+            Subject: snsMessage,
+            Message: snsMessage
+          })
+          .promise()
+        console.log('Successfully sent SNS message:', snsResult)
+      }
+    } catch (error) {
+      console.error('Failed to send SNS message:', error)
     }
 
     const statusCode = 200
-    const body = dataTransform(data)
+    const body = dataTransform(ec2Result)
     console.log(body)
     callback(null, { statusCode, body })
-  })
+  } catch (error) {
+    console.error(error)
+    callback(new Error(error))
+  }
 }

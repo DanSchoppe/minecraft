@@ -25,68 +25,25 @@ resource "aws_apigatewayv2_stage" "stage" {
   auto_deploy = true
 }
 
-resource "aws_apigatewayv2_route" "start" {
-  api_id = aws_apigatewayv2_api.minecraft.id
-  route_key = "GET /start"
-  target = "integrations/${aws_apigatewayv2_integration.start.id}"
+module "start" {
+  source = "./route"
+  name = "start"
+  api = aws_apigatewayv2_api.minecraft
+  ec2_instance = aws_instance.minecraft
+  sns_topic_arn = aws_sns_topic.server_start.arn
+  sns_message = "The server has been started!"
 }
 
-resource "aws_apigatewayv2_integration" "start" {
-  api_id = aws_apigatewayv2_api.minecraft.id
-  integration_type = "AWS_PROXY"
-  integration_method = "POST"
-  integration_uri = aws_lambda_function.start.invoke_arn
-  payload_format_version = "2.0"
+module "stop" {
+  source = "./route"
+  name = "stop"
+  api = aws_apigatewayv2_api.minecraft
+  ec2_instance = aws_instance.minecraft
 }
 
-resource "aws_lambda_permission" "start_permission" {
-  statement_id = "AllowStartInvoke"
-  action = "lambda:InvokeFunction"
-  function_name = "start"
-  principal = "apigateway.amazonaws.com"
-  source_arn = "${aws_apigatewayv2_api.minecraft.execution_arn}/*/*/start"
-}
-
-resource "aws_apigatewayv2_route" "stop" {
-  api_id = aws_apigatewayv2_api.minecraft.id
-  route_key = "GET /stop"
-  target = "integrations/${aws_apigatewayv2_integration.stop.id}"
-}
-
-resource "aws_apigatewayv2_integration" "stop" {
-  api_id = aws_apigatewayv2_api.minecraft.id
-  integration_type = "AWS_PROXY"
-  integration_method = "POST"
-  integration_uri = aws_lambda_function.stop.invoke_arn
-  payload_format_version = "2.0"
-}
-
-resource "aws_lambda_permission" "stop_permission" {
-  statement_id = "AllowStopInvoke"
-  action = "lambda:InvokeFunction"
-  function_name = "stop"
-  principal = "apigateway.amazonaws.com"
-  source_arn = "${aws_apigatewayv2_api.minecraft.execution_arn}/*/*/stop"
-}
-
-resource "aws_apigatewayv2_route" "status" {
-  api_id = aws_apigatewayv2_api.minecraft.id
-  route_key = "GET /status"
-  target = "integrations/${aws_apigatewayv2_integration.status.id}"
-}
-
-resource "aws_apigatewayv2_integration" "status" {
-  api_id = aws_apigatewayv2_api.minecraft.id
-  integration_type = "AWS_PROXY"
-  integration_method = "POST"
-  integration_uri = aws_lambda_function.status.invoke_arn
-  payload_format_version = "2.0"
-}
-
-resource "aws_lambda_permission" "status_permission" {
-  statement_id = "AllowStatusInvoke"
-  action = "lambda:InvokeFunction"
-  function_name = "status"
-  principal = "apigateway.amazonaws.com"
-  source_arn = "${aws_apigatewayv2_api.minecraft.execution_arn}/*/*/status"
+module "status" {
+  source = "./route"
+  name = "status"
+  api = aws_apigatewayv2_api.minecraft
+  ec2_instance = aws_instance.minecraft
 }
