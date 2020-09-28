@@ -1,15 +1,12 @@
-# Going with a c5.large instance type
-#  - 2 compute optimized vCPUs (single core turbo frequency of up to 3.5 GHz)
-#  - 4GB RAM
-#  - $0.085 per Hour
 resource "aws_instance" "minecraft" {
-  instance_type = "c5.large"
+  # TODO: choose a more optimal instance
+  instance_type = "c5d.large"
   # Ubuntu Server 20.04 LTS (HVM), SSD Volume Type
   ami = "ami-068663a3c619dd892"
   key_name = "minecraft"
   security_groups = [ aws_security_group.minecraft.name ]
+  disable_api_termination = true
 }
-output "server_ip" { value = aws_instance.minecraft.public_ip }
 
 resource "aws_security_group" "minecraft" {
   name = "minecraft"
