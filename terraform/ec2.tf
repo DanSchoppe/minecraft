@@ -8,6 +8,7 @@ resource "aws_instance" "minecraft" {
   ami = "ami-068663a3c619dd892"
   key_name = "minecraft"
   security_groups = [ aws_security_group.minecraft.name ]
+  disable_api_termination = true
 }
 output "server_ip" { value = aws_instance.minecraft.public_ip }
 
