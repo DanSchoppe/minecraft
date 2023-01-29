@@ -1,11 +1,14 @@
 resource "aws_instance" "minecraft" {
-  # TODO: choose a more optimal instance
-  instance_type = "c5d.large"
+  instance_type = "c6i.large"
   # Ubuntu Server 20.04 LTS (HVM), SSD Volume Type
   ami = "ami-068663a3c619dd892"
   key_name = "minecraft"
   security_groups = [ aws_security_group.minecraft.name ]
   disable_api_termination = true
+
+  tags = {
+    Name = "Minecraft"
+  }
 }
 
 resource "aws_security_group" "minecraft" {
